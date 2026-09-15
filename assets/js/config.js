@@ -10,8 +10,8 @@
 //  den omgår alle sikkerhetsregler og skal aldri forlate Supabase.
 // ============================================================================
 
-export const SUPABASE_URL = 'SETT_INN_PROJECT_URL';
-export const SUPABASE_ANON_KEY = 'SETT_INN_ANON_PUBLIC_KEY';
+export const SUPABASE_URL = 'https://cnlinyavjdhsipbovtbf.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNubGlueWF2amRoc2lwYm92dGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NTY5NDIsImV4cCI6MjEwNTAzMjk0Mn0.Vv-IznWQXWqmpDPR9Z5PPM2Q33hspoFRbqZ5qK9Ayx4';
 
 export const APP = {
   // Vises i toppen av appen
