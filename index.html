@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <title>Nøkkelkort</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+</head>
+<body>
+
+<div id="varsel" class="varsel" role="status" aria-live="polite"></div>
+
+<!-- ======================================================================
+     Skjerm: oppsett mangler
+     ====================================================================== -->
+<div data-skjerm="oppsett" hidden>
+  <main class="midtstilt">
+    <div class="kort-panel panel--smal">
+      <h1>Oppsett gjenstår</h1>
+      <p>Systemet er ikke koblet til en database ennå.</p>
+      <ol class="liste">
+        <li>Opprett et prosjekt på <strong>supabase.com</strong> med region <strong>EU (Frankfurt)</strong>.</li>
+        <li>Kjør filene i mappen <code>supabase/</code> i SQL-editoren.</li>
+        <li>Lim inn <em>Project URL</em> og <em>anon public key</em> i <code>assets/js/config.js</code>.</li>
+      </ol>
+      <p class="hint">Full framgangsmåte står i <code>docs/OPPSETT.md</code> i kodelageret.</p>
+    </div>
+  </main>
+</div>
+
+<!-- ======================================================================
+     Skjerm: innlogging
+     ====================================================================== -->
+<div data-skjerm="innlogging" hidden>
+  <main class="midtstilt">
+    <div class="kort-panel panel--smal">
+      <div class="merkevare">
+        <span class="merkevare__ikon" aria-hidden="true">🔑</span>
+        <div>
+          <h1 class="merkevare__navn">Nøkkelkort</h1>
+          <p class="merkevare__org" id="org-navn">Kommunen</p>
+        </div>
+      </div>
+
+      <form id="skjema-innlogging" class="skjema">
+        <label class="etikett">E-post
+          <input type="email" id="felt-epost" name="epost" class="felt" required
+                 autocomplete="username" placeholder="fornavn.etternavn@kommune.no">
+        </label>
+        <label class="etikett">Passord
+          <input type="password" name="passord" class="felt" required
+                 autocomplete="current-password">
+        </label>
+        <button type="submit" id="knapp-logg-inn" class="knapp knapp--primar knapp--stor knapp--bred">
+          Logg inn
+        </button>
+        <a href="#" id="lenke-glemt" class="lenke-liten">Glemt passord?</a>
+      </form>
+
+      <p class="fotnote">
+        Kontoer opprettes av administrator. Systemet inneholder personopplysninger
+        og er kun til tjenstlig bruk.
+      </p>
+    </div>
+  </main>
+</div>
+
+<!-- ======================================================================
+     Skjerm: konto venter på aktivering
+     ====================================================================== -->
+<div data-skjerm="venter" hidden>
+  <main class="midtstilt">
+    <div class="kort-panel panel--smal">
+      <h1>Kontoen er ikke aktivert</h1>
+      <p>Du er logget inn som <strong id="venter-epost"></strong>, men kontoen har ikke fått
+         tilgang ennå.</p>
+      <p class="hint">Nye kontoer opprettes uten tilgang med vilje. En administrator må
+         tildele deg rolle før du ser noe. Ta kontakt med den som administrerer systemet.</p>
+      <button class="knapp knapp--stille knapp--bred" data-logg-ut>Logg ut</button>
+    </div>
+  </main>
+</div>
+
+<!-- ======================================================================
+     Skjerm: applikasjonen
+     ====================================================================== -->
+<div data-skjerm="app" class="skall" hidden>
+
+  <header class="topplinje">
+    <button id="meny-knapp" class="ikonknapp meny-knapp" aria-label="Vis meny">☰</button>
+    <div class="merkevare merkevare--liten">
+      <span class="merkevare__ikon" aria-hidden="true">🔑</span>
+      <div>
+        <span class="merkevare__navn">Nøkkelkort</span>
+        <span class="merkevare__org">Utlån og innlevering</span>
+      </div>
+    </div>
+    <div class="bruker">
+      <div class="bruker__tekst">
+        <span class="bruker__navn" id="bruker-navn"></span>
+        <span class="bruker__rolle" id="bruker-rolle"></span>
+      </div>
+      <button class="knapp knapp--liten knapp--stille" data-logg-ut>Logg ut</button>
+    </div>
+  </header>
+
+  <nav id="nav" class="sidemeny" aria-label="Hovedmeny">
+    <button class="navknapp" data-visning="oversikt">
+      <span aria-hidden="true">📋</span> Oversikt
+    </button>
+    <button class="navknapp" data-visning="nytt-utlan">
+      <span aria-hidden="true">➕</span> Nytt utlån
+    </button>
+    <button class="navknapp" data-visning="kort">
+      <span aria-hidden="true">🗂️</span> Kortbeholdning
+    </button>
+    <button class="navknapp" data-visning="historikk">
+      <span aria-hidden="true">🕓</span> Historikk
+    </button>
+
+    <p class="sidemeny__fot">
+      Utlån lagres med navn og tidspunkt. Avsluttede utlån anonymiseres etter
+      <span id="retensjon">24</span> måneder.
+    </p>
+  </nav>
+
+  <main id="innhold" class="innhold"></main>
+</div>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
