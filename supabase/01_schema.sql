@@ -4,6 +4,46 @@
 --  Kjør filene i rekkefølge: 01_schema.sql, 02_policies.sql, 03_seed_example.sql
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- Forhåndskontroll
+--
+-- "create table if not exists" hopper stille over en tabell som allerede
+-- finnes med samme navn, og etterlater da et halvferdig system. Derfor
+-- stoppes kjøringen her, med en forklaring, hvis prosjektet allerede har en
+-- tabell med et av navnene våre som ikke hører til dette systemet.
+--
+-- public.profiles er unntaket: den finnes i mange Supabase-maler, og lenger
+-- nede legges kolonnene våre til i den i stedet for å avbryte.
+-- ----------------------------------------------------------------------------
+do $$
+declare
+  kollisjon text;
+begin
+  select string_agg('public.' || f.t, ', ' order by f.t)
+    into kollisjon
+  from (values
+    ('cards', 'card_number'),
+    ('loans', 'borrower_name'),
+    ('card_events', 'event')
+  ) as f(t, signatur)
+  where exists (
+    select 1 from information_schema.tables it
+     where it.table_schema = 'public' and it.table_name = f.t
+  )
+  and not exists (
+    select 1 from information_schema.columns ic
+     where ic.table_schema = 'public' and ic.table_name = f.t and ic.column_name = f.signatur
+  );
+
+  if kollisjon is not null then
+    raise exception
+      'Prosjektet har allerede tabellen(e) % med et annet innhold enn dette '
+      'systemet forventer. Ingenting er endret. Velg et tomt Supabase-prosjekt, '
+      'eller gi de eksisterende tabellene nye navn først. '
+      'Se avsnittet "Tabellen finnes fra før" i docs/OPPSETT.md.', kollisjon;
+  end if;
+end $$;
+
 create extension if not exists pgcrypto;
 create extension if not exists pg_trgm;
 
@@ -39,6 +79,16 @@ create table if not exists public.profiles (
   active      boolean         not null default false,
   created_at  timestamptz     not null default now()
 );
+
+-- Mange Supabase-prosjekter har allerede en public.profiles fra en av malene
+-- (typisk "User Management"). Da hopper "create table if not exists" stille
+-- over tabellen over, og systemet blir stående halvferdig. Derfor legges
+-- kolonnene våre til eksplisitt. Setningene er trygge å kjøre om igjen, og
+-- gjør ingenting hvis kolonnen allerede finnes.
+alter table public.profiles add column if not exists full_name  text            not null default '';
+alter table public.profiles add column if not exists role       public.app_role not null default 'leder';
+alter table public.profiles add column if not exists active     boolean         not null default false;
+alter table public.profiles add column if not exists created_at timestamptz     not null default now();
 
 comment on table  public.profiles is
   'Personer som logger inn i systemet. Nye kontoer opprettes inaktive med lavest rettighet og må aktiveres manuelt av en admin.';
@@ -338,4 +388,44 @@ begin
 
   get diagnostics n = row_count;
   return n;
+end $$;
+
+-- ============================================================================
+--  Sluttkontroll
+--
+--  "create table if not exists" hopper stille over en tabell som allerede
+--  finnes med samme navn. Uten denne kontrollen kunne skjemaet blitt stående
+--  halvferdig uten at noen merket det før systemet var i bruk. Her sjekkes det
+--  at alt faktisk ble som forventet, og kjøringen stopper hvis ikke.
+-- ============================================================================
+do $$
+declare
+  mangler text;
+begin
+  select string_agg(f.t || '.' || f.c, ', ' order by f.t, f.c)
+    into mangler
+  from (values
+    ('profiles', 'full_name'), ('profiles', 'role'), ('profiles', 'active'),
+    ('cards', 'card_number'),  ('cards', 'status'),
+    ('loans', 'card_id'),      ('loans', 'borrower_name'),
+    ('loans', 'borrowed_at'),  ('loans', 'returned_at'),
+    ('loans', 'return_condition'), ('loans', 'anonymized_at'),
+    ('card_events', 'card_id'), ('card_events', 'event')
+  ) as f(t, c)
+  where not exists (
+    select 1 from information_schema.columns ic
+     where ic.table_schema = 'public'
+       and ic.table_name   = f.t
+       and ic.column_name  = f.c
+  );
+
+  if mangler is not null then
+    raise exception
+      'Skjemaet er ikke komplett. Disse kolonnene mangler: %. '
+      'Årsaken er nesten alltid at en tabell med samme navn fantes i prosjektet '
+      'fra før, slik at "create table if not exists" hoppet over den. '
+      'Se avsnittet "Tabellen finnes fra før" i docs/OPPSETT.md.', mangler;
+  end if;
+
+  raise notice 'Skjema OK: alle tabeller og kolonner er på plass.';
 end $$;

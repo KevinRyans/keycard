@@ -170,6 +170,26 @@ personen faktisk skal låne ut kort.
 En kollega registrerte kortet i samme øyeblikk. Last siden på nytt.
 Dette er databasen som gjør jobben sin.
 
+**«Tabellen finnes fra før»**
+
+Feilmeldinger som `column "active" of relation "public.profiles" does not exist`,
+eller beskjeden om at prosjektet allerede har en av tabellene våre, betyr at
+Supabase-prosjektet ikke var tomt. Det vanligste er at en av Supabase sine maler
+(«User Management») allerede har laget en `profiles`-tabell.
+
+- **Gjelder det `profiles`:** Dette håndteres automatisk. Skriptet legger til
+  kolonnene som mangler i stedet for å avbryte. Eksisterende brukere i tabellen
+  arver `rolle = leder` og `aktiv = nei`, altså ingen tilgang, og må aktiveres
+  bevisst med blokk 2 i `03_admin_og_testdata.sql`. Kjør `01_schema.sql` på nytt.
+
+- **Gjelder det `cards`, `loans` eller `card_events`:** Skriptet stopper uten å
+  endre noe. Enten bruker du et tomt Supabase-prosjekt (enklest, og det jeg
+  anbefaler), eller du gir de eksisterende tabellene andre navn først.
+
+`01_schema.sql` er trygg å kjøre flere ganger. Går den gjennom, avslutter den med
+`NOTICE: Skjema OK: alle tabeller og kolonner er på plass.` Ser du ikke den
+linjen, er ikke skjemaet komplett – uansett hva som ellers står i loggen.
+
 **Innlogging virker lokalt, men ikke på GitHub Pages**
 Legg til nettadressen til siden under **Authentication → URL Configuration →
 Redirect URLs** i Supabase.
